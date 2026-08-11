@@ -6,4 +6,4 @@ assumptions:
 problems solved, unsolved:
 - 1st : 1 timetable (with all batches class mentioned comma sep in a slot)
 - 2nd : diff timetable for diff batches
-- same course lectures are placed one after the other all, not 1-2 in a day, there's no such choice
+- same course lectures are placed one after the other all, not 1-2 in a day 
