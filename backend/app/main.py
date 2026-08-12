@@ -46,6 +46,10 @@ def build_conflict_graph(sessions):
                     G.add_edge(n1, n2)
     return G
 
+@app.get("/")
+def read_root():
+    return {"status": "ok", "message": "Timetable Scheduler API is running"}
+
 @app.post("/generate_timetable")
 def generate_timetable(req: TimetableRequest):
     # build nodes (sessions)

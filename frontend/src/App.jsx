@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import emailjs from "@emailjs/browser";
-const SERVICE_ID = "service_nrbsu7h";
-const TEMPLATE_ID = "template_xxxxx";
-const PUBLIC_KEY = "xxxxxxxxxxxx";
+const SERVICE_ID = import.meta.env.VITE_SERVICE_ID;
+const TEMPLATE_ID = import.meta.env.VITE_TEMPLATE_ID;
+const PUBLIC_KEY = import.meta.env.VITE_PUBLIC_KEY;
 
 function App() {
   const [email, setEmail] = useState("");
@@ -172,58 +172,64 @@ const [pdfData, setPdfData] = useState(null);
     return doc;
   };
 
+const formatTimetableText = (generatedTimetable) => {
+  let text = `Timetable\n\n`;
+
+  Object.keys(generatedTimetable).forEach((batch) => {
+    const batchData = generatedTimetable[batch];
+    text += `Batch: ${batch}\n`;
+    text += "-".repeat(40) + "\n";
+
+    Object.keys(batchData).forEach((day) => {
+      text += `${day}:\n`;
+      Object.keys(batchData[day]).forEach((slot) => {
+        const classes = batchData[day][slot];
+        if (classes.length > 0) {
+          text += `  ${slot} - ${classes.join(", ")}\n`;
+        }
+      });
+    });
+
+    text += "\n";
+  });
+
+  return text;
+};
+
 const sendTimetableEmail = async () => {
   if (!email) {
-    alert("Email address enter karo.");
+    alert("Please enter email address");
     return;
   }
 
   if (!timetable) {
-    alert("Pehle timetable generate karo.");
+    alert("Generate timetable first.");
     return;
   }
 
   try {
     setLoading(true);
 
-    // PDF banao, lekin download mat karo
-    const doc = generatePDF(timetable, false);
+    const timetableText = formatTimetableText(timetable);
 
-    // PDF ko Data URI/Base64 mein convert karo
-    const pdfBase64 = doc.output("datauristring");
-
-    console.log("SERVICE:", SERVICE_ID);
-    console.log("TEMPLATE:", TEMPLATE_ID);
-    console.log("EMAIL:", email);
-    console.log("PDF SIZE:", pdfBase64.length);
-
-    const result = await emailjs.send(
+    await emailjs.send(
       SERVICE_ID,
       TEMPLATE_ID,
       {
         to_email: email,
-        message: "Please find the weekly timetable attached.",
-        pdf_attachment: pdfBase64,
+        name: "Timetable Scheduler",
+        email: email,
+        timetable_text: timetableText, // <-- new field
       },
       {
         publicKey: PUBLIC_KEY,
       }
     );
 
-    console.log("EMAIL SUCCESS:", result);
-
-    alert("✅ Email successfully sent!");
-
+    alert("✅ Timetable email successfully sent!");
   } catch (error) {
-    console.error("EMAIL ERROR:", error);
-    console.error("STATUS:", error?.status);
-    console.error("TEXT:", error?.text);
-
-    alert(
-      `❌ Email failed\n\n${
-        error?.text || error?.message || "Unknown EmailJS error"
-      }`
-    );
+    console.error("Email Error:", error);
+    alert("❌ Failed to send email. Check console.");
   } finally {
     setLoading(false);
   }
@@ -634,7 +640,7 @@ const sendTimetableEmail = async () => {
                 }}
               >
                 <h2>
-                  Weekly Timetable - {batch}
+                  Timetable - {batch}
                 </h2>
 
                 <table
