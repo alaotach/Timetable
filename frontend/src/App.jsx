@@ -30,48 +30,52 @@ function App() {
   // Frontend Schedule Extractor & Formatter (Replaces Backend Agent)
   // -------------------------------------------------------------
   const extractAndFormatProfSchedule = (fullTimetable, profName) => {
-    const normProfName = profName.trim().toLowerCase();
-    const scheduleByDay = {}; // Shape: { day: { slot: [ "Course (Batch)" ] } }
+  // Normalize search name (e.g. "dr. sharma")
+  const normProfName = profName.trim().toLowerCase();
+  const scheduleByDay = {};
 
-    Object.entries(fullTimetable).forEach(([batch, daysData]) => {
-      Object.entries(daysData).forEach(([day, slotsData]) => {
-        Object.entries(slotsData).forEach(([slot, entries]) => {
-          entries.forEach((entry) => {
-            // Entry format: "Course Name - Prof Name"
-            if (!entry.includes(" - ")) return;
-            const lastDashIndex = entry.lastIndexOf(" - ");
-            const coursePart = entry.substring(0, lastDashIndex).trim();
-            const profPart = entry.substring(lastDashIndex + 3).trim();
+  Object.entries(fullTimetable).forEach(([batch, daysData]) => {
+    Object.entries(daysData).forEach(([day, slotsData]) => {
+      Object.entries(slotsData).forEach(([slot, entries]) => {
+        entries.forEach((entry) => {
+          if (!entry.includes(" - ")) return;
 
-            if (profPart.toLowerCase() === normProfName) {
-              if (!scheduleByDay[day]) scheduleByDay[day] = {};
-              if (!scheduleByDay[day][slot]) scheduleByDay[day][slot] = [];
-              scheduleByDay[day][slot].push(`${coursePart} (${batch})`);
-            }
-          });
+          // Split by " - " from right to separate course and professor
+          const parts = entry.split(" - ");
+          const profPart = parts.pop().trim().toLowerCase();
+          const coursePart = parts.join(" - ").trim();
+
+          // Flexible match check
+          if (profPart === normProfName || profPart.includes(normProfName) || normProfName.includes(profPart)) {
+            if (!scheduleByDay[day]) scheduleByDay[day] = {};
+            if (!scheduleByDay[day][slot]) scheduleByDay[day][slot] = [];
+            scheduleByDay[day][slot].push(`${coursePart} (${batch})`);
+          }
         });
       });
     });
+  });
 
-    // Format plain text string for the email template
-    let formattedText = `Individual Class Schedule for Prof. ${profName}\n`;
-    formattedText += "=".repeat(45) + "\n\n";
+  // Format output text
+  let formattedText = `Individual Class Schedule for Prof. ${profName}\n`;
+  formattedText += "=".repeat(45) + "\n\n";
 
-    if (Object.keys(scheduleByDay).length === 0) {
-      formattedText += "No classes scheduled for this week.";
-      return formattedText;
-    }
-
-    Object.entries(scheduleByDay).forEach(([day, slotsData]) => {
-      formattedText += `📅 ${day}:\n`;
-      Object.entries(slotsData).forEach(([slot, classes]) => {
-        formattedText += `   • ${slot}: ${classes.join(", ")}\n`;
-      });
-      formattedText += "\n";
-    });
-
+  const daysFound = Object.keys(scheduleByDay);
+  if (daysFound.length === 0) {
+    formattedText += "No classes scheduled for this week.";
     return formattedText;
-  };
+  }
+
+  daysFound.forEach((day) => {
+    formattedText += `📅 ${day}:\n`;
+    Object.entries(scheduleByDay[day]).forEach(([slot, classes]) => {
+      formattedText += `   • ${slot}: ${classes.join(", ")}\n`;
+    });
+    formattedText += "\n";
+  });
+
+  return formattedText;
+};
 
   // -------------------------------------------------------------
   // File Processing

@@ -1,14 +1,14 @@
 [
-  { "name": "Dr. Sharma", 
+  { "name": "Sharma", 
   "Prof_Id": "1",
   "id":1,
 
-  "email": "sunakshi1310@gmail.com" },
-  { "name": "Dr. Verma", 
+  "email": "sharma@yopmail.com" },
+  { "name": "Verma", 
   "Prof_Id": "2",
   "id":2,
   "email": "verma@yopmail.com" },
-  { "name": "Dr. Iyer", 
+  { "name": "Iyer", 
   "Prof_Id": "3",
   "id":3,
   "email": "iyer@yopmail.com" }
