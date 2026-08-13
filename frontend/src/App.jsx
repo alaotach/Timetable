@@ -34,6 +34,7 @@ function App() {
   const normProfName = profName.trim().toLowerCase();
   const scheduleByDay = {};
 
+  
   Object.entries(fullTimetable).forEach(([batch, daysData]) => {
     Object.entries(daysData).forEach(([day, slotsData]) => {
       Object.entries(slotsData).forEach(([slot, entries]) => {
