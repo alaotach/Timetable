@@ -17,7 +17,10 @@ import {
 
 import { generatePDF } from "./utils/pdfGenerator";
 
-
+import {
+  sendFullTimetableEmail,
+  sendProfessorTimetableEmail,
+} from "./services/emailService";
 
 function App() {
   /* =========================================================
