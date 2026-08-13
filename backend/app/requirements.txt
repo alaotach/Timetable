@@ -1,2 +1,11 @@
 networkx
 fastapi
+
+requests
+
+uvicorn[standard]
+
+pydantic
+
+
+python-dotenv
